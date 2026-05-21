@@ -1,0 +1,64 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export type BmcBlockId =
+  | 'KP' // Key Partners
+  | 'KA' // Key Activities
+  | 'KR' // Key Resources
+  | 'VP' // Value Propositions
+  | 'CR' // Customer Relationships
+  | 'CH' // Channels
+  | 'CS' // Customer Segments
+  | 'C$' // Cost Structure
+  | 'R$' // Revenue Streams
+
+export interface BmcBusinessExample {
+  businessName: string
+  items: string[]
+}
+
+export interface BmcElement {
+  id: BmcBlockId
+  name: string
+  nameEn: string
+  iconName: string // Lucide icon reference
+  color: string // Tailwind color class scheme (e.g., bg-emerald-50 text-emerald-700)
+  definition: string
+  keyQuestions: string[]
+  examples: BmcBusinessExample[]
+}
+
+export interface QuestionMC {
+  id: string
+  question: string
+  options: {
+    key: 'A' | 'B' | 'C' | 'D'
+    text: string
+  }[]
+  correctAnswer: 'A' | 'B' | 'C' | 'D'
+  explanation: string
+  category: string
+}
+
+export interface QuestionEssay {
+  id: string
+  title: string
+  scenario: string
+  task: string
+  suggestedAnswer: string
+  keywords: string[] // Essential keywords for evaluation
+  gradingRubric: {
+    point: string
+    description: string
+  }[]
+}
+
+export interface StudyStats {
+  masteredCards: string[] // List of mastered BmcBlockId
+  reviewNeededCards: string[] // List of review-needed BmcBlockId
+  highScoreMC: number // Highest score in Multiple Choice (percentage)
+  totalQuizzesTaken: number
+  essaysCompletedCount: number
+}

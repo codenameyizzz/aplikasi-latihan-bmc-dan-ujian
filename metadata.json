@@ -1,0 +1,6 @@
+{
+  "name": "Aplikasi Latihan BMC dan Ujian",
+  "description": "Website latihan ujian pilihan ganda, essay studi kasus bisnis, dan memory flashcards interaktif untuk kognisi serta hafalan 9 elemen utama Business Model Canvas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
