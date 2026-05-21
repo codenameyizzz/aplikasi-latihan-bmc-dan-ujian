@@ -4,7 +4,7 @@ import { studyMaterials } from '../data/materialStudyData'
 import { Icon } from './Icon'
 
 interface QuizMultipleChoiceProps {
-  onQuizCompleted: (scorePercentage: number) => void
+  onQuizCompleted: (scorePercentage: number, materialTitle: string) => void
 }
 
 type OptionKey = 'A' | 'B' | 'C' | 'D'
@@ -68,7 +68,7 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
       selectedKey === currentQuestion.correctAnswer ? correctAnswersCount : correctAnswersCount
     const scorePercentage = Math.round((finalCorrectCount / totalQuestions) * 100)
     setQuizFinished(true)
-    onQuizCompleted(scorePercentage)
+    onQuizCompleted(scorePercentage, selectedMaterial.title)
   }
 
   const handleResetQuiz = () => {
@@ -143,7 +143,7 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
 
       {!quizFinished ? (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="text-[10px] font-bold text-brand-olive bg-brand-palesage border border-brand-sageborder/50 rounded-lg px-2.5 py-1">
               Topik: {currentQuestion.category}
             </span>
@@ -258,7 +258,7 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
             <div className="flex justify-end pt-2">
               <button
                 onClick={handleNext}
-                className="bg-brand-sage hover:bg-brand-olive text-brand-cream px-5 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-1 cursor-pointer shadow-sm hover:shadow-md transition active:scale-95"
+                className="w-full sm:w-auto bg-brand-sage hover:bg-brand-olive text-brand-cream px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1 cursor-pointer shadow-sm hover:shadow-md transition active:scale-95"
               >
                 <span>{currentIndex + 1 === totalQuestions ? 'Selesaikan Set Soal' : 'Soal Berikutnya'}</span>
                 <Icon name="ArrowRight" size={14} />
@@ -297,17 +297,17 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
 
           <div className="text-xs leading-relaxed max-w-md mx-auto text-brand-charcoal">
             {scorePercentage >= 80 ? (
-              <span className="text-brand-olive font-medium flex items-center justify-center gap-1.5 bg-[#EEF4F2] px-4 py-2 rounded-xl border border-brand-sageborder">
+                <span className="text-brand-olive font-medium flex items-start justify-center gap-1.5 bg-[#EEF4F2] px-4 py-2 rounded-xl border border-brand-sageborder">
                 <Icon name="Check" size={16} />
                 <span>Pemahaman untuk materi ini sudah kuat. Lanjut ke file berikutnya.</span>
               </span>
             ) : scorePercentage >= 50 ? (
-              <span className="text-brand-stone font-semibold flex items-center justify-center gap-1.5 bg-[#FAF6EC] px-4 py-2 rounded-xl border border-brand-border">
+                <span className="text-brand-stone font-semibold flex items-start justify-center gap-1.5 bg-[#FAF6EC] px-4 py-2 rounded-xl border border-brand-border">
                 <Icon name="Info" size={16} />
                 <span>Dasarnya sudah ada, tetapi beberapa konsep masih perlu diulang dari deck materi ini.</span>
               </span>
             ) : (
-              <span className="text-[#9A5B50] font-semibold flex items-center justify-center gap-1.5 bg-[#FAF0ED] px-4 py-2 rounded-xl border border-[#EAD3CE]">
+                <span className="text-[#9A5B50] font-semibold flex items-start justify-center gap-1.5 bg-[#FAF0ED] px-4 py-2 rounded-xl border border-[#EAD3CE]">
                 <Icon name="XCircle" size={16} />
                 <span>Ulangi ringkasan dan flashcard materi ini sebelum lanjut ke materi lain.</span>
               </span>

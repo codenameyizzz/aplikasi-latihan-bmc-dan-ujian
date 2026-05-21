@@ -55,6 +55,23 @@ export interface QuestionEssay {
   }[]
 }
 
+export interface CustomFlashcard {
+  id: string
+  materialId: string
+  front: string
+  back: string
+  bullets: string[]
+  createdAt: string
+}
+
+export interface StudyHistoryEntry {
+  id: string
+  type: 'flashcard_mastered' | 'flashcard_unmastered' | 'flashcard_created' | 'quiz_completed' | 'essay_completed' | 'stats_reset'
+  title: string
+  detail: string
+  createdAt: string
+}
+
 export interface StudyStats {
   masteredCards: string[] // List of mastered BmcBlockId
   reviewNeededCards: string[] // List of review-needed BmcBlockId

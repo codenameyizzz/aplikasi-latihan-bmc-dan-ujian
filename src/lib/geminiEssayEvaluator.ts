@@ -10,18 +10,19 @@ export interface EssayEvaluationResult {
   suggestedRevision: string
 }
 
-const modelName = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.1-flash-lite-preview'
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+const serverModelName = 'gemini-3.1-flash-lite-preview'
+const fallbackClientModelName = import.meta.env.VITE_GEMINI_MODEL || serverModelName
+const fallbackClientApiKey = import.meta.env.VITE_GEMINI_API_KEY
 
 let aiClient: GoogleGenAI | null = null
 
 function getClient() {
-  if (!apiKey) {
-    throw new Error('VITE_GEMINI_API_KEY belum diset.')
+  if (!fallbackClientApiKey) {
+    throw new Error('VITE_GEMINI_API_KEY belum diset untuk fallback lokal.')
   }
 
   if (!aiClient) {
-    aiClient = new GoogleGenAI({ apiKey })
+    aiClient = new GoogleGenAI({ apiKey: fallbackClientApiKey })
   }
 
   return aiClient
@@ -41,13 +42,8 @@ function extractJsonObject(text: string) {
   return match[0]
 }
 
-export async function evaluateEssayWithGemini(
-  essay: QuestionEssay,
-  userAnswer: string
-): Promise<EssayEvaluationResult> {
-  const ai = getClient()
-
-  const prompt = `
+function buildEvaluationPrompt(essay: QuestionEssay, userAnswer: string) {
+  return `
 Anda adalah dosen penguji Technopreneurship.
 Nilai jawaban essay mahasiswa secara adil, ringkas, dan ketat berdasarkan prompt, kata kunci, dan rubrik.
 
@@ -94,21 +90,11 @@ ${essay.suggestedAnswer}
 Jawaban mahasiswa:
 ${userAnswer}
 `
+}
 
-  const response = await ai.models.generateContent({
-    model: modelName,
-    contents: prompt,
-    config: {
-      temperature: 0.2,
-      responseMimeType: 'application/json'
-    }
-  })
-
-  const jsonText = extractJsonObject(response.text || '')
-  const parsed = JSON.parse(jsonText) as EssayEvaluationResult
-
+function normalizeEvaluationResult(parsed: Partial<EssayEvaluationResult>): EssayEvaluationResult {
   return {
-    score: Number.isFinite(parsed.score) ? Math.max(0, Math.min(100, Math.round(parsed.score))) : 0,
+    score: Number.isFinite(parsed.score) ? Math.max(0, Math.min(100, Math.round(parsed.score as number))) : 0,
     verdict: parsed.verdict || 'Penilaian selesai.',
     strengths: Array.isArray(parsed.strengths) ? parsed.strengths : [],
     improvements: Array.isArray(parsed.improvements) ? parsed.improvements : [],
@@ -117,10 +103,77 @@ ${userAnswer}
   }
 }
 
+async function evaluateViaServer(essay: QuestionEssay, userAnswer: string): Promise<EssayEvaluationResult> {
+  const response = await fetch('/api/evaluate-essay', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      essay,
+      userAnswer
+    })
+  })
+
+  if (!response.ok) {
+    const fallbackMessage = `Server evaluator gagal dengan status ${response.status}.`
+    let detail = fallbackMessage
+
+    try {
+      const data = await response.json()
+      detail = data?.error || fallbackMessage
+    } catch {
+      detail = fallbackMessage
+    }
+
+    throw new Error(detail)
+  }
+
+  const data = (await response.json()) as EssayEvaluationResult
+  return normalizeEvaluationResult(data)
+}
+
+async function evaluateViaClientFallback(
+  essay: QuestionEssay,
+  userAnswer: string
+): Promise<EssayEvaluationResult> {
+  const ai = getClient()
+  const prompt = buildEvaluationPrompt(essay, userAnswer)
+
+  const response = await ai.models.generateContent({
+    model: fallbackClientModelName,
+    contents: prompt,
+    config: {
+      temperature: 0.2,
+      responseMimeType: 'application/json'
+    }
+  })
+
+  const jsonText = extractJsonObject(response.text || '')
+  return normalizeEvaluationResult(JSON.parse(jsonText) as EssayEvaluationResult)
+}
+
+export async function evaluateEssayWithGemini(
+  essay: QuestionEssay,
+  userAnswer: string
+): Promise<EssayEvaluationResult> {
+  try {
+    return await evaluateViaServer(essay, userAnswer)
+  } catch (error) {
+    if (!fallbackClientApiKey) {
+      throw error
+    }
+
+    return evaluateViaClientFallback(essay, userAnswer)
+  }
+}
+
 export function isGeminiEssayEvaluationEnabled() {
-  return Boolean(apiKey)
+  return true
 }
 
 export function getGeminiEssayModelName() {
-  return modelName
+  return serverModelName
 }
+
+export { buildEvaluationPrompt, normalizeEvaluationResult, extractJsonObject }

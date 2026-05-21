@@ -1,21 +1,45 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
-import { studyMaterials, totalMaterialEssayQuestions, totalMaterialFlashcards, totalMaterialQuestions } from '../data/materialStudyData'
-import { StudyStats } from '../types'
+import { studyMaterials, totalMaterialEssayQuestions, totalMaterialQuestions } from '../data/materialStudyData'
+import { StudyHistoryEntry, StudyStats } from '../types'
 import { Icon } from './Icon'
 
 interface DashboardProps {
   stats: StudyStats
+  totalFlashcards: number
+  customFlashcardCount: number
+  studyHistory: StudyHistoryEntry[]
   onNavigate: (tab: 'canvas' | 'flashcards' | 'mc' | 'essay') => void
   onResetStats: () => void
 }
 
-export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
+function formatRelativeDate(value: string) {
+  const date = new Date(value)
+
+  try {
+    return new Intl.DateTimeFormat('id-ID', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(date)
+  } catch {
+    return date.toLocaleString()
+  }
+}
+
+export function Dashboard({
+  stats,
+  totalFlashcards,
+  customFlashcardCount,
+  studyHistory,
+  onNavigate,
+  onResetStats
+}: DashboardProps) {
   const masteredCount = stats.masteredCards.length
-  const masteryPercentage = Math.round((masteredCount / totalMaterialFlashcards) * 100)
+  const masteryPercentage = totalFlashcards > 0 ? Math.round((masteredCount / totalFlashcards) * 100) : 0
   const [selectedMaterialId, setSelectedMaterialId] = useState(studyMaterials[0].id)
   const selectedMaterial =
     studyMaterials.find((material) => material.id === selectedMaterialId) || studyMaterials[0]
+  const recentHistory = useMemo(() => studyHistory.slice(0, 6), [studyHistory])
 
   return (
     <motion.div
@@ -37,9 +61,8 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
             Persiapan Ujian Technopreneurship
           </h1>
           <p className="text-[#FAF9F6]/90 text-sm sm:text-base leading-relaxed">
-            Project ini sekarang memadukan canvas BMC, flashcard, dan kuis pilihan ganda yang diturunkan langsung
-            dari {studyMaterials.length} file pada folder `materials`, sehingga alur belajarnya mengikuti bahan
-            kuliah yang Anda miliki.
+            Project ini memadukan canvas BMC, flashcard, kuis, essay, dan file materi asli. Riwayat belajar serta
+            flashcard tambahan user juga disimpan langsung di browser.
           </p>
         </div>
       </div>
@@ -57,7 +80,7 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
           <div>
             <div className="flex items-baseline space-x-2">
               <span className="text-4xl font-display font-black text-brand-charcoal">{masteredCount}</span>
-              <span className="text-sm text-brand-stone">/ {totalMaterialFlashcards} Kartu</span>
+              <span className="text-sm text-brand-stone">/ {totalFlashcards} Kartu</span>
             </div>
             <div className="w-full bg-[#FAF9F6] h-2 rounded-full mt-3 overflow-hidden border border-brand-border/60">
               <div
@@ -67,8 +90,11 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
             </div>
             <p className="text-xs text-brand-stone mt-2">
               {masteryPercentage === 100
-                ? 'Semua deck materi sudah selesai dihafal.'
-                : `${masteryPercentage}% dari seluruh kartu materi telah ditandai hafal.`}
+                ? 'Semua kartu yang tersedia sudah dikuasai.'
+                : `${masteryPercentage}% dari total flashcard telah ditandai hafal.`}
+            </p>
+            <p className="text-[11px] text-brand-stone mt-3">
+              Kartu kustom milik user: <strong className="text-brand-olive">{customFlashcardCount}</strong>
             </p>
           </div>
         </div>
@@ -87,8 +113,8 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
               <span className="text-4xl font-display font-black text-brand-charcoal">{stats.highScoreMC}%</span>
             </div>
             <p className="text-xs text-brand-stone mt-5">
-              Total percobaan kuis: <strong className="text-brand-olive">{stats.totalQuizzesTaken}</strong> sesi
-              dari {totalMaterialQuestions} butir soal yang tersedia.
+              Total percobaan kuis: <strong className="text-brand-olive">{stats.totalQuizzesTaken}</strong> sesi dari{' '}
+              {totalMaterialQuestions} butir soal.
             </p>
           </div>
         </div>
@@ -125,13 +151,12 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
             <div className="bg-brand-palesage text-brand-sage p-3 rounded-xl group-hover:scale-105 transition-transform border border-brand-sageborder/40">
               <Icon name="Layout" size={24} />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <h3 className="font-display font-bold text-brand-charcoal group-hover:text-brand-olive transition-colors">
                 1. Canvas BMC Interaktif
               </h3>
               <p className="text-xs text-brand-stone leading-relaxed">
-                Pakai mode ini untuk mengulang konsep inti 9 blok Business Model Canvas sebelum masuk ke latihan
-                berbasis file materi.
+                Ulangi konsep inti 9 blok Business Model Canvas sebelum masuk ke latihan berbasis file materi.
               </p>
             </div>
           </button>
@@ -143,13 +168,12 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
             <div className="bg-brand-palesage text-brand-olive p-3 rounded-xl group-hover:scale-105 transition-transform border border-brand-sageborder/40">
               <Icon name="Brain" size={24} />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <h3 className="font-display font-bold text-brand-charcoal group-hover:text-brand-olive transition-colors">
                 2. Flashcards Per File
               </h3>
               <p className="text-xs text-brand-stone leading-relaxed">
-                Pilih salah satu dari {studyMaterials.length} file materi, lalu hafalkan inti konsep per topik dengan
-                mode active recall.
+                Hafalkan inti konsep per topik, lalu tambahkan kartu buatan Anda sendiri untuk pengulangan personal.
               </p>
             </div>
           </button>
@@ -161,13 +185,12 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
             <div className="bg-brand-palesage text-brand-stone p-3 rounded-xl group-hover:scale-105 transition-transform border border-brand-sageborder/30">
               <Icon name="CheckSquare" size={24} />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <h3 className="font-display font-bold text-brand-charcoal group-hover:text-brand-olive transition-colors">
                 3. Pilihan Ganda Per File
               </h3>
               <p className="text-xs text-brand-stone leading-relaxed">
-                Kerjakan set soal khusus untuk tiap file materi. Total tersedia {totalMaterialQuestions} butir soal
-                yang tersebar ke beberapa topik utama.
+                Kerjakan set soal khusus untuk tiap file materi dengan pembahasan langsung di akhir.
               </p>
             </div>
           </button>
@@ -179,12 +202,12 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
             <div className="bg-brand-palesage text-brand-olive p-3 rounded-xl group-hover:scale-105 transition-transform border border-brand-sageborder/40">
               <Icon name="FileText" size={24} />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <h3 className="font-display font-bold text-brand-charcoal group-hover:text-brand-olive transition-colors">
                 4. Analisis Kasus Esai
               </h3>
               <p className="text-xs text-brand-stone leading-relaxed">
-                Gunakan studi kasus untuk menguji sintesis antarblok BMC setelah hafalan dan kuis materi selesai.
+                Gunakan studi kasus untuk menguji sintesis antarblok BMC dan dapatkan penilaian AI serta rubrik mandiri.
               </p>
             </div>
           </button>
@@ -193,17 +216,42 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
 
       <div className="bg-brand-sand rounded-2xl p-6 border border-brand-border space-y-4">
         <div className="flex items-center space-x-2 text-brand-charcoal">
+          <Icon name="History" className="text-brand-sage" size={20} />
+          <h4 className="font-display font-bold text-xs uppercase tracking-wider text-brand-olive">Riwayat Belajar Lokal</h4>
+        </div>
+
+        {recentHistory.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {recentHistory.map((entry) => (
+              <div key={entry.id} className="bg-[#FAF9F6] border border-brand-border rounded-2xl p-4 space-y-1 min-w-0">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm font-bold text-brand-charcoal">{entry.title}</p>
+                  <span className="text-[10px] font-mono text-brand-stone shrink-0">
+                    {formatRelativeDate(entry.createdAt)}
+                  </span>
+                </div>
+                <p className="text-xs text-brand-stone leading-relaxed break-words">{entry.detail}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-[#FAF9F6] border border-brand-border rounded-2xl p-4 text-xs text-brand-stone">
+            Belum ada riwayat belajar tersimpan. Mulai latihan, tambah flashcard, atau selesaikan kuis untuk mengisi log ini.
+          </div>
+        )}
+      </div>
+
+      <div className="bg-brand-sand rounded-2xl p-6 border border-brand-border space-y-4">
+        <div className="flex items-center space-x-2 text-brand-charcoal">
           <Icon name="BookOpen" className="text-brand-sage" size={20} />
-          <h4 className="font-display font-bold text-xs uppercase tracking-wider text-brand-olive">
-            Ringkasan File Materi
-          </h4>
+          <h4 className="font-display font-bold text-xs uppercase tracking-wider text-brand-olive">Ringkasan File Materi</h4>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {studyMaterials.map((material) => (
-            <div key={material.id} className="bg-[#FAF9F6] border border-brand-border rounded-2xl p-4 space-y-2">
+            <div key={material.id} className="bg-[#FAF9F6] border border-brand-border rounded-2xl p-4 space-y-2 min-w-0">
               <div className="flex items-start justify-between gap-3">
                 <h5 className="text-sm font-bold text-brand-charcoal">{material.title}</h5>
-                <span className="text-[10px] font-mono bg-brand-palesage text-brand-olive px-2 py-1 rounded-full border border-brand-sageborder">
+                <span className="text-[10px] font-mono bg-brand-palesage text-brand-olive px-2 py-1 rounded-full border border-brand-sageborder shrink-0">
                   {material.flashcards.length} kartu / {material.quizQuestions.length} soal
                 </span>
               </div>
@@ -216,9 +264,7 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
       <div className="bg-brand-sand rounded-2xl p-6 border border-brand-border space-y-4">
         <div className="flex items-center space-x-2 text-brand-charcoal">
           <Icon name="FolderOpen" className="text-brand-sage" size={20} />
-          <h4 className="font-display font-bold text-xs uppercase tracking-wider text-brand-olive">
-            Akses File Materials
-          </h4>
+          <h4 className="font-display font-bold text-xs uppercase tracking-wider text-brand-olive">Akses File Materials</h4>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -238,10 +284,10 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_1.4fr] gap-4">
-          <div className="bg-[#FAF9F6] border border-brand-border rounded-2xl p-4 space-y-3">
+          <div className="bg-[#FAF9F6] border border-brand-border rounded-2xl p-4 space-y-3 min-w-0">
             <div className="space-y-1">
               <h5 className="text-sm font-bold text-brand-charcoal">{selectedMaterial.title}</h5>
-              <p className="text-xs text-brand-stone leading-relaxed">{selectedMaterial.sourceFile}</p>
+              <p className="text-xs text-brand-stone leading-relaxed break-all">{selectedMaterial.sourceFile}</p>
               <p className="text-xs text-brand-charcoal leading-relaxed">{selectedMaterial.summary}</p>
             </div>
 
@@ -272,15 +318,15 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
             </div>
           </div>
 
-          <div className="bg-[#FAF9F6] border border-brand-border rounded-2xl p-3 min-h-[420px]">
+          <div className="bg-[#FAF9F6] border border-brand-border rounded-2xl p-3 min-h-[340px] sm:min-h-[420px]">
             {selectedMaterial.sourceType === 'pdf' ? (
               <iframe
                 title={selectedMaterial.title}
                 src={selectedMaterial.sourceHref}
-                className="w-full h-[420px] rounded-xl border border-brand-border bg-white"
+                className="w-full h-[60vh] min-h-[320px] sm:h-[420px] rounded-xl border border-brand-border bg-white"
               />
             ) : (
-              <div className="h-[420px] rounded-xl border border-dashed border-brand-border flex flex-col items-center justify-center text-center p-6 bg-brand-sand">
+              <div className="h-[60vh] min-h-[320px] sm:h-[420px] rounded-xl border border-dashed border-brand-border flex flex-col items-center justify-center text-center p-6 bg-brand-sand">
                 <Icon name="Presentation" size={40} className="text-brand-sage" />
                 <p className="mt-4 text-sm font-bold text-brand-charcoal">Preview PPTX belum tersedia langsung di browser.</p>
                 <p className="mt-2 text-xs text-brand-stone max-w-md leading-relaxed">
@@ -291,7 +337,7 @@ export function Dashboard({ stats, onNavigate, onResetStats }: DashboardProps) {
           </div>
         </div>
 
-        {(stats.masteredCards.length > 0 || stats.totalQuizzesTaken > 0 || stats.essaysCompletedCount > 0) && (
+        {(stats.masteredCards.length > 0 || stats.totalQuizzesTaken > 0 || stats.essaysCompletedCount > 0 || studyHistory.length > 0) && (
           <div className="pt-4 border-t border-brand-border flex justify-end">
             <button
               onClick={onResetStats}

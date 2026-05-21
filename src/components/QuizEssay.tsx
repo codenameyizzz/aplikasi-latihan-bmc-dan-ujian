@@ -11,7 +11,7 @@ import {
 } from '../lib/geminiEssayEvaluator'
 
 interface QuizEssayProps {
-  onEssayCompleted: () => void
+  onEssayCompleted: (essayTitle: string, materialTitle: string) => void
 }
 
 export function QuizEssay({ onEssayCompleted }: QuizEssayProps) {
@@ -77,7 +77,7 @@ export function QuizEssay({ onEssayCompleted }: QuizEssayProps) {
       ...prev,
       [currentCase.id]: true
     }))
-    onEssayCompleted()
+    onEssayCompleted(currentCase.title, selectedMaterial.title)
 
     if (!aiEvaluationEnabled) {
       setAiError((prev) => ({
@@ -289,11 +289,11 @@ export function QuizEssay({ onEssayCompleted }: QuizEssayProps) {
             />
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
             {hasSubmitted ? (
               <button
                 onClick={handleResetCaseAnswer}
-                className="text-xs text-[#9A5B50] hover:text-[#7A453C] font-bold bg-[#FAF0ED] hover:bg-[#FAF0ED]/85 px-4 py-2 rounded-xl border border-[#EAD3CE] transition duration-150 cursor-pointer"
+                className="w-full sm:w-auto text-xs text-[#9A5B50] hover:text-[#7A453C] font-bold bg-[#FAF0ED] hover:bg-[#FAF0ED]/85 px-4 py-2 rounded-xl border border-[#EAD3CE] transition duration-150 cursor-pointer"
               >
                 Tulis Ulang Jawaban Ini
               </button>
@@ -304,7 +304,7 @@ export function QuizEssay({ onEssayCompleted }: QuizEssayProps) {
             <button
               onClick={handleSubmitEvaluation}
               disabled={!currentAnswerText.trim() || hasSubmitted}
-              className="bg-brand-sage hover:bg-brand-olive disabled:bg-brand-darksand disabled:text-brand-stone/50 text-brand-cream px-5 py-2.5 rounded-xl text-xs font-extrabold flex items-center space-x-1.5 transition shadow-sm hover:shadow active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto bg-brand-sage hover:bg-brand-olive disabled:bg-brand-darksand disabled:text-brand-stone/50 text-brand-cream px-5 py-2.5 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-1.5 transition shadow-sm hover:shadow active:scale-95 cursor-pointer"
             >
               <Icon name="SearchCode" size={14} />
               <span>Evaluasi Jawaban</span>
