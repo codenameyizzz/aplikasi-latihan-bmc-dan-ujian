@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { totalBmcCaseStudies } from '../data/bmcCaseStudies'
 import { totalDocxQuestionCount, getMultipleChoiceQuestionsForMaterial } from '../data/docxMultipleChoiceQuestionBank'
 import { studyMaterials, totalMaterialEssayQuestions } from '../data/materialStudyData'
+import { getTrueFalseQuestionsForMaterial, totalTrueFalseQuestionCount } from '../data/trueFalseQuestionBank'
 import { StudyHistoryEntry, StudyStats } from '../types'
 import { Icon } from './Icon'
 
@@ -11,7 +12,7 @@ interface DashboardProps {
   totalFlashcards: number
   customFlashcardCount: number
   studyHistory: StudyHistoryEntry[]
-  onNavigate: (tab: 'canvas' | 'flashcards' | 'mc' | 'essay') => void
+  onNavigate: (tab: 'canvas' | 'flashcards' | 'mc' | 'tf' | 'essay') => void
   onResetStats: () => void
 }
 
@@ -107,7 +108,7 @@ export function Dashboard({
               <Icon name="Award" size={24} />
             </div>
             <span className="text-[10px] font-mono font-bold text-brand-stone uppercase bg-[#FAF9F6] px-2 py-1 rounded-md border border-brand-border/40">
-              Skor PG
+              Kuis Objektif
             </span>
           </div>
           <div>
@@ -115,8 +116,12 @@ export function Dashboard({
               <span className="text-4xl font-display font-black text-brand-charcoal">{stats.highScoreMC}%</span>
             </div>
             <p className="text-xs text-brand-stone mt-5">
-              Total percobaan kuis: <strong className="text-brand-olive">{stats.totalQuizzesTaken}</strong> sesi dari{' '}
-              {totalDocxQuestionCount} butir soal.
+              High score PG: <strong className="text-brand-olive">{stats.highScoreMC}%</strong> dari{' '}
+              {totalDocxQuestionCount} soal.
+            </p>
+            <p className="text-[11px] text-brand-stone mt-3">
+              High score TF: <strong className="text-brand-olive">{stats.highScoreTF}%</strong> dari{' '}
+              {totalTrueFalseQuestionCount} soal. Percobaan TF: {stats.totalTrueFalseTaken} sesi.
             </p>
           </div>
         </div>
@@ -202,6 +207,23 @@ export function Dashboard({
           </button>
 
           <button
+            onClick={() => onNavigate('tf')}
+            className="group text-left p-6 bg-[#FAF9F6] hover:bg-brand-sand border border-brand-border rounded-2xl transition duration-200 shadow-xs hover:shadow-md flex items-start space-x-4 cursor-pointer"
+          >
+            <div className="bg-brand-palesage text-brand-stone p-3 rounded-xl group-hover:scale-105 transition-transform border border-brand-sageborder/30">
+              <Icon name="ToggleLeft" size={24} />
+            </div>
+            <div className="space-y-1 min-w-0">
+              <h3 className="font-display font-bold text-brand-charcoal group-hover:text-brand-olive transition-colors">
+                4. True / False Per File
+              </h3>
+              <p className="text-xs text-brand-stone leading-relaxed">
+                Latih pemahaman konsep inti dengan 5 pernyataan benar atau salah untuk setiap materi.
+              </p>
+            </div>
+          </button>
+
+          <button
             onClick={() => onNavigate('essay')}
             className="group text-left p-6 bg-[#FAF9F6] hover:bg-brand-sand border border-brand-border rounded-2xl transition duration-200 shadow-xs hover:shadow-md flex items-start space-x-4 cursor-pointer"
           >
@@ -210,7 +232,7 @@ export function Dashboard({
             </div>
             <div className="space-y-1 min-w-0">
               <h3 className="font-display font-bold text-brand-charcoal group-hover:text-brand-olive transition-colors">
-                4. Analisis Kasus Esai
+                5. Analisis Kasus Esai
               </h3>
               <p className="text-xs text-brand-stone leading-relaxed">
                 Gunakan studi kasus untuk menguji sintesis antarblok BMC dan dapatkan penilaian AI serta rubrik mandiri.
@@ -258,7 +280,7 @@ export function Dashboard({
               <div className="flex items-start justify-between gap-3">
                 <h5 className="text-sm font-bold text-brand-charcoal">{material.title}</h5>
                 <span className="text-[10px] font-mono bg-brand-palesage text-brand-olive px-2 py-1 rounded-full border border-brand-sageborder shrink-0">
-                  {material.flashcards.length} kartu / {getMultipleChoiceQuestionsForMaterial(material.id).length} soal
+                  {material.flashcards.length} kartu / {getMultipleChoiceQuestionsForMaterial(material.id).length} PG / {getTrueFalseQuestionsForMaterial(material.id).length} TF
                 </span>
               </div>
               <p className="text-xs text-brand-stone leading-relaxed">{material.summary}</p>
@@ -345,6 +367,7 @@ export function Dashboard({
 
         {(stats.masteredCards.length > 0 ||
           stats.totalQuizzesTaken > 0 ||
+          stats.totalTrueFalseTaken > 0 ||
           stats.essaysCompletedCount > 0 ||
           stats.bmcCasesCompletedCount > 0 ||
           studyHistory.length > 0) && (

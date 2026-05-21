@@ -185,6 +185,10 @@ export function BmcCasePractice({ onCaseCompleted }: BmcCasePracticeProps) {
             <p>Gunakan nama blok BMC asli dalam English: `Key Partners`, `Key Activities`, `Key Resources`, dan seterusnya.</p>
             <p>Isi tiap blok dengan poin yang spesifik terhadap studi kasus, bukan definisi umum.</p>
             <p>Jika satu blok punya lebih dari satu isi, pisahkan dengan koma, titik koma, atau baris baru.</p>
+            <p>
+              Khusus `Channels`, susun jawaban berdasarkan 5 fase materi Channel: `Awareness`, `Evaluation`, `Purchase`,
+              `Delivery`, dan `After Sales`.
+            </p>
           </div>
 
           <div className="bg-[#FAF9F6] border border-brand-border rounded-2xl p-4">
@@ -400,6 +404,11 @@ function renderAnswerBlock(
   onChange: (blockId: BmcBlockId, value: string) => void,
   className = ''
 ) {
+  const placeholder =
+    blockId === 'CH'
+      ? 'Awareness: ...\nEvaluation: ...\nPurchase: ...\nDelivery: ...\nAfter Sales: ...'
+      : block.keyQuestions[0]
+
   return (
     <div
       key={blockId}
@@ -423,12 +432,21 @@ function renderAnswerBlock(
       <textarea
         value={value}
         onChange={(event) => onChange(blockId, event.target.value)}
-        placeholder={block.keyQuestions[0]}
+        placeholder={placeholder}
         className="mt-4 w-full flex-1 min-h-[120px] p-3 bg-[#FAF9F6] border border-brand-border focus:border-brand-sage focus:ring-1 focus:ring-brand-sage rounded-2xl text-xs leading-relaxed outline-none transition resize-none text-brand-charcoal"
       />
 
       <p className="mt-2 text-[10px] text-brand-stone leading-relaxed">
-        Gunakan poin spesifik untuk blok <strong className="text-brand-charcoal">{block.name}</strong>.
+        {blockId === 'CH' ? (
+          <>
+            Gunakan format fase untuk blok <strong className="text-brand-charcoal">{block.name}</strong>:
+            {' '}Awareness, Evaluation, Purchase, Delivery, After Sales.
+          </>
+        ) : (
+          <>
+            Gunakan poin spesifik untuk blok <strong className="text-brand-charcoal">{block.name}</strong>.
+          </>
+        )}
       </p>
     </div>
   )

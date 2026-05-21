@@ -48,6 +48,16 @@ Anda adalah dosen penguji mata kuliah Technopreneurship yang sedang menilai lati
 Bandingkan jawaban mahasiswa terhadap studi kasus dan kunci acuan.
 Terima sinonim atau redaksi yang setara, tetapi kurangi nilai jika blok kosong, terlalu umum, salah blok, atau tidak cocok dengan studi kasus.
 
+Aturan khusus untuk blok Channels:
+Terdapat lima fase pada Channel dalam proses menjangkau Customer Segment dan membawa Value Proposition ke pasar, yaitu:
+Awareness
+Evaluation
+Purchase
+Delivery
+After Sales
+Untuk blok CH, nilai tinggi hanya diberikan jika jawaban mengikuti atau setidaknya secara jelas mencakup lima fase tersebut.
+Jika jawaban CH tidak terstruktur menurut fase atau ada fase penting yang hilang, turunkan nilai CH dan jelaskan fase yang lemah atau tidak ada.
+
 Kembalikan HANYA JSON valid tanpa markdown, tanpa backticks, tanpa penjelasan tambahan.
 
 Skema JSON:
@@ -79,6 +89,7 @@ Aturan:
 - score tiap blockFeedback integer 0-10
 - notes tiap blok ringkas dan spesifik
 - Jangan mengarang jawaban mahasiswa yang tidak ditulis
+- Untuk blockFeedback pada CH, notes harus menyebut apakah Awareness, Evaluation, Purchase, Delivery, dan After Sales sudah tercakup atau belum
 
 Judul studi kasus:
 ${caseStudy.title}

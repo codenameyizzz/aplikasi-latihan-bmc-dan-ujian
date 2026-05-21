@@ -42,6 +42,14 @@ export interface QuestionMC {
   category: string
 }
 
+export interface QuestionTF {
+  id: string
+  statement: string
+  correctAnswer: boolean
+  explanation: string
+  category: string
+}
+
 export interface QuestionEssay {
   id: string
   title: string
@@ -101,6 +109,7 @@ export interface StudyHistoryEntry {
     | 'flashcard_unmastered'
     | 'flashcard_created'
     | 'quiz_completed'
+    | 'truefalse_completed'
     | 'essay_completed'
     | 'bmc_case_completed'
     | 'stats_reset'
@@ -113,7 +122,9 @@ export interface StudyStats {
   masteredCards: string[] // List of mastered BmcBlockId
   reviewNeededCards: string[] // List of review-needed BmcBlockId
   highScoreMC: number // Highest score in Multiple Choice (percentage)
+  highScoreTF: number
   totalQuizzesTaken: number
+  totalTrueFalseTaken: number
   essaysCompletedCount: number
   bmcCasesCompletedCount: number
 }

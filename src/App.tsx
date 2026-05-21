@@ -4,6 +4,7 @@ import { Dashboard } from './components/Dashboard'
 import { BmcCanvas } from './components/BmcCanvas'
 import { Flashcards } from './components/Flashcards'
 import { QuizMultipleChoice } from './components/QuizMultipleChoice'
+import { QuizTrueFalse } from './components/QuizTrueFalse'
 import { QuizEssay } from './components/QuizEssay'
 import { Icon } from './components/Icon'
 import { totalMaterialFlashcards } from './data/materialStudyData'
@@ -17,12 +18,14 @@ const defaultStats: StudyStats = {
   masteredCards: [],
   reviewNeededCards: [],
   highScoreMC: 0,
+  highScoreTF: 0,
   totalQuizzesTaken: 0,
+  totalTrueFalseTaken: 0,
   essaysCompletedCount: 0,
   bmcCasesCompletedCount: 0
 }
 
-type ActiveTab = 'dashboard' | 'canvas' | 'flashcards' | 'mc' | 'essay'
+type ActiveTab = 'dashboard' | 'canvas' | 'flashcards' | 'mc' | 'tf' | 'essay'
 
 function createLocalId(prefix: string) {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -223,6 +226,30 @@ export default function App() {
     triggerToast('Jawaban esai berhasil dievaluasi.')
   }
 
+  const handleQuizTFCompleted = (scorePercentage: number, materialTitle: string) => {
+    const previousHighScore = stats.highScoreTF
+    const isNewHigh = scorePercentage > previousHighScore
+
+    saveStats({
+      ...stats,
+      totalTrueFalseTaken: stats.totalTrueFalseTaken + 1,
+      highScoreTF: isNewHigh ? scorePercentage : previousHighScore
+    })
+
+    appendHistory({
+      type: 'truefalse_completed',
+      title: 'Kuis True / False selesai',
+      detail: `${materialTitle} - skor ${scorePercentage}%`
+    })
+
+    if (isNewHigh) {
+      triggerToast(`Skor terbaik True / False baru tercapai: ${scorePercentage}%.`)
+      return
+    }
+
+    triggerToast(`Hasil True / False tersimpan: ${scorePercentage}%.`)
+  }
+
   const handleBmcCaseCompleted = (caseTitle: string, score: number) => {
     saveStats({
       ...stats,
@@ -237,7 +264,7 @@ export default function App() {
   }
 
   const handleResetStats = () => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus seluruh progres flashcard, kuis, evaluasi esai, latihan BMC, dan riwayat belajar?')) {
+    if (window.confirm('Apakah Anda yakin ingin menghapus seluruh progres flashcard, kuis, true / false, evaluasi esai, latihan BMC, dan riwayat belajar?')) {
       saveStats(defaultStats)
       saveStudyHistory([
         {
@@ -282,6 +309,8 @@ export default function App() {
         )
       case 'mc':
         return <QuizMultipleChoice onQuizCompleted={handleQuizMCCompleted} />
+      case 'tf':
+        return <QuizTrueFalse onQuizCompleted={handleQuizTFCompleted} />
       case 'essay':
         return <QuizEssay onEssayCompleted={handleEssayCompleted} />
       default:
@@ -305,6 +334,7 @@ export default function App() {
     { id: 'canvas', label: 'Canvas', icon: 'Layout' },
     { id: 'flashcards', label: 'Cards', icon: 'Brain' },
     { id: 'mc', label: 'PG', icon: 'CheckSquare' },
+    { id: 'tf', label: 'TF', icon: 'ToggleLeft' },
     { id: 'essay', label: 'Essay', icon: 'FileText' }
   ]
 
@@ -341,6 +371,10 @@ export default function App() {
               <div className="flex items-center space-x-1 text-brand-charcoal bg-brand-sand px-2.5 py-1 rounded-lg border border-brand-border">
                 <Icon name="Award" size={14} className="text-brand-sage" />
                 <span>Skor PG: {stats.highScoreMC}%</span>
+              </div>
+              <div className="flex items-center space-x-1 text-brand-charcoal bg-brand-sand px-2.5 py-1 rounded-lg border border-brand-border">
+                <Icon name="ToggleLeft" size={14} className="text-brand-sage" />
+                <span>Skor TF: {stats.highScoreTF}%</span>
               </div>
             </div>
           </div>
@@ -390,7 +424,7 @@ export default function App() {
       </footer>
 
       <nav className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-brand-border bg-[#FAF9F6]/95 backdrop-blur-md px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2">
-        <div className="grid grid-cols-5 gap-1">
+        <div className="grid grid-cols-6 gap-1">
           {navItems.map((item) => (
             <button
               key={item.id}
