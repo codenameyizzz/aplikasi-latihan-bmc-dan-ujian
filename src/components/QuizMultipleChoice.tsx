@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { studyMaterials } from '../data/materialStudyData'
+import { getMultipleChoiceQuestionsForMaterial } from '../data/docxMultipleChoiceQuestionBank'
 import { Icon } from './Icon'
 
 interface QuizMultipleChoiceProps {
@@ -25,7 +26,7 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
 
   const selectedMaterial =
     studyMaterials.find((material) => material.id === selectedMaterialId) || studyMaterials[0]
-  const questions = selectedMaterial.quizQuestions
+  const questions = getMultipleChoiceQuestionsForMaterial(selectedMaterialId)
   const currentQuestion = questions[currentIndex]
   const totalQuestions = questions.length
 
@@ -38,6 +39,7 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
   }, [selectedMaterialId])
 
   const handleSelectOption = (key: OptionKey) => {
+    if (!currentQuestion) return
     if (selectedKey !== null) return
 
     setSelectedKey(key)
@@ -58,6 +60,8 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
   }
 
   const handleNext = () => {
+    if (!currentQuestion) return
+
     if (currentIndex + 1 < totalQuestions) {
       setSelectedKey(null)
       setCurrentIndex((prev) => prev + 1)
@@ -79,9 +83,9 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
     setResultsLog([])
   }
 
-  const scorePercentage = Math.round((correctAnswersCount / totalQuestions) * 100)
+  const scorePercentage = totalQuestions > 0 ? Math.round((correctAnswersCount / totalQuestions) * 100) : 0
   const hasAnswered = selectedKey !== null
-  const isSelectedCorrect = selectedKey === currentQuestion.correctAnswer
+  const isSelectedCorrect = currentQuestion ? selectedKey === currentQuestion.correctAnswer : false
 
   return (
     <motion.div
@@ -97,7 +101,7 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
             <span>Pilihan Ganda Per Materi</span>
           </h2>
           <p className="text-brand-stone text-xs mt-1">
-            Pilih file materi lalu kerjakan set soal yang diturunkan dari topik utama file tersebut.
+            Pilih file materi lalu kerjakan semua soal pilihan ganda yang diambil dari dokumen sumber.
           </p>
         </div>
 
@@ -141,7 +145,11 @@ export function QuizMultipleChoice({ onQuizCompleted }: QuizMultipleChoiceProps)
         </div>
       </div>
 
-      {!quizFinished ? (
+      {totalQuestions === 0 ? (
+        <div className="bg-brand-sand rounded-2xl border border-brand-border p-6 text-sm text-brand-stone">
+          Belum ada soal pilihan ganda yang terhubung untuk materi ini.
+        </div>
+      ) : !quizFinished ? (
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="text-[10px] font-bold text-brand-olive bg-brand-palesage border border-brand-sageborder/50 rounded-lg px-2.5 py-1">

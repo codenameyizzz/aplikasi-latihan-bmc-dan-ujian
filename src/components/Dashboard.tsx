@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
-import { studyMaterials, totalMaterialEssayQuestions, totalMaterialQuestions } from '../data/materialStudyData'
+import { totalDocxQuestionCount, getMultipleChoiceQuestionsForMaterial } from '../data/docxMultipleChoiceQuestionBank'
+import { studyMaterials, totalMaterialEssayQuestions } from '../data/materialStudyData'
 import { StudyHistoryEntry, StudyStats } from '../types'
 import { Icon } from './Icon'
 
@@ -114,7 +115,7 @@ export function Dashboard({
             </div>
             <p className="text-xs text-brand-stone mt-5">
               Total percobaan kuis: <strong className="text-brand-olive">{stats.totalQuizzesTaken}</strong> sesi dari{' '}
-              {totalMaterialQuestions} butir soal.
+              {totalDocxQuestionCount} butir soal.
             </p>
           </div>
         </div>
@@ -252,7 +253,7 @@ export function Dashboard({
               <div className="flex items-start justify-between gap-3">
                 <h5 className="text-sm font-bold text-brand-charcoal">{material.title}</h5>
                 <span className="text-[10px] font-mono bg-brand-palesage text-brand-olive px-2 py-1 rounded-full border border-brand-sageborder shrink-0">
-                  {material.flashcards.length} kartu / {material.quizQuestions.length} soal
+                  {material.flashcards.length} kartu / {getMultipleChoiceQuestionsForMaterial(material.id).length} soal
                 </span>
               </div>
               <p className="text-xs text-brand-stone leading-relaxed">{material.summary}</p>
