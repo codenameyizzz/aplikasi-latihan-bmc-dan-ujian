@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
+import { totalBmcCaseStudies } from '../data/bmcCaseStudies'
 import { totalDocxQuestionCount, getMultipleChoiceQuestionsForMaterial } from '../data/docxMultipleChoiceQuestionBank'
 import { studyMaterials, totalMaterialEssayQuestions } from '../data/materialStudyData'
 import { StudyHistoryEntry, StudyStats } from '../types'
@@ -138,6 +139,10 @@ export function Dashboard({
               Evaluasi esai selesai: <strong className="text-brand-olive">{stats.essaysCompletedCount}</strong> dari{' '}
               {totalMaterialEssayQuestions} prompt essay.
             </p>
+            <p className="text-[11px] text-brand-stone mt-3">
+              Evaluasi latihan BMC: <strong className="text-brand-olive">{stats.bmcCasesCompletedCount}</strong> sesi.
+              Tersedia {totalBmcCaseStudies} studi kasus.
+            </p>
           </div>
         </div>
       </div>
@@ -157,7 +162,7 @@ export function Dashboard({
                 1. Canvas BMC Interaktif
               </h3>
               <p className="text-xs text-brand-stone leading-relaxed">
-                Ulangi konsep inti 9 blok Business Model Canvas sebelum masuk ke latihan berbasis file materi.
+                Ulangi konsep inti 9 blok Business Model Canvas dan kerjakan studi kasus dengan kanvas kosong yang dinilai AI.
               </p>
             </div>
           </button>
@@ -338,7 +343,11 @@ export function Dashboard({
           </div>
         </div>
 
-        {(stats.masteredCards.length > 0 || stats.totalQuizzesTaken > 0 || stats.essaysCompletedCount > 0 || studyHistory.length > 0) && (
+        {(stats.masteredCards.length > 0 ||
+          stats.totalQuizzesTaken > 0 ||
+          stats.essaysCompletedCount > 0 ||
+          stats.bmcCasesCompletedCount > 0 ||
+          studyHistory.length > 0) && (
           <div className="pt-4 border-t border-brand-border flex justify-end">
             <button
               onClick={onResetStats}

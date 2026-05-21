@@ -8,10 +8,16 @@ import { motion, AnimatePresence } from 'motion/react'
 import { bmcElements } from '../data/bmcData'
 import { BmcBlockId, BmcElement } from '../types'
 import { Icon } from './Icon'
+import { BmcCasePractice } from './BmcCasePractice'
 
-export function BmcCanvas() {
+interface BmcCanvasProps {
+  onBmcCaseCompleted?: (caseTitle: string, score: number) => void
+}
+
+export function BmcCanvas({ onBmcCaseCompleted }: BmcCanvasProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<BmcBlockId>('VP') // Default select Value Prop
   const [selectedExampleIndex, setSelectedExampleIndex] = useState<number>(0) // 0 for Coffee Shop, 1 for SaaS
+  const [activeMode, setActiveMode] = useState<'theory' | 'practice'>('theory')
 
   const activeElement = bmcElements.find((e) => e.id === selectedBlockId) || bmcElements[3]
 
@@ -164,25 +170,61 @@ export function BmcCanvas() {
       id="canvas-view"
     >
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-display font-extrabold text-brand-charcoal flex items-center gap-2">
-            <Icon name="Layout" className="text-brand-sage" size={26} />
-            <span>Interactive Business Model Canvas</span>
-          </h2>
-          <p className="text-brand-stone text-xs sm:text-sm">
-            Click any block below to review the concept, guiding questions, and sample inputs used in a standard BMC.
-          </p>
+        <div className="space-y-2">
+          <div>
+            <h2 className="text-2xl font-display font-extrabold text-brand-charcoal flex items-center gap-2">
+              <Icon name="Layout" className="text-brand-sage" size={26} />
+              <span>Interactive Business Model Canvas</span>
+            </h2>
+            <p className="text-brand-stone text-xs sm:text-sm">
+              Pahami teori 9 blok BMC lalu pindah ke latihan studi kasus untuk mengisi kanvas kosong dan dinilai AI.
+            </p>
+          </div>
+
+          <div className="flex bg-brand-darksand p-1 rounded-xl self-start text-xs font-bold leading-normal w-fit">
+            <button
+              onClick={() => setActiveMode('theory')}
+              className={`px-3 py-1.5 rounded-lg transition duration-150 cursor-pointer ${
+                activeMode === 'theory'
+                  ? 'bg-[#FAF9F6] text-brand-olive shadow-sm font-black'
+                  : 'text-brand-stone hover:text-brand-charcoal'
+              }`}
+            >
+              Konsep BMC
+            </button>
+            <button
+              onClick={() => setActiveMode('practice')}
+              className={`px-3 py-1.5 rounded-lg transition duration-150 cursor-pointer ${
+                activeMode === 'practice'
+                  ? 'bg-[#FAF9F6] text-brand-olive shadow-sm font-black'
+                  : 'text-brand-stone hover:text-brand-charcoal'
+              }`}
+            >
+              Latihan Studi Kasus
+            </button>
+          </div>
         </div>
-        
-        {/* Short guide */}
+
         <div className="bg-brand-sand border border-brand-border rounded-xl px-3 py-2 text-[11px] text-brand-charcoal flex items-center gap-1.5 max-w-sm shadow-xs">
-          <Icon name="Info" className="text-brand-sage shrink-0" size={16} />
-          <span>This view uses the interactive <strong>standard international 5x2 BMC layout</strong>.</span>
+          <Icon name={activeMode === 'theory' ? 'Info' : 'ClipboardList'} className="text-brand-sage shrink-0" size={16} />
+          <span>
+            {activeMode === 'theory' ? (
+              <>
+                This view uses the interactive <strong>standard international 5x2 BMC layout</strong>.
+              </>
+            ) : (
+              <>
+                Isi blok BMC dengan nama English yang asli, tetapi penjelasan dan jawaban boleh dalam Bahasa Indonesia.
+              </>
+            )}
+          </span>
         </div>
       </div>
 
-      {/* Grid Canvas responsive */}
-      <div className="space-y-6">
+      {activeMode === 'practice' ? (
+        <BmcCasePractice onCaseCompleted={onBmcCaseCompleted} />
+      ) : (
+        <div className="space-y-6">
         
         {/* Desktop grid, hidden on small, visible on md+ */}
         <div className="hidden md:grid md:grid-cols-10 md:grid-rows-3 gap-3">
@@ -381,6 +423,7 @@ export function BmcCanvas() {
         </div>
 
       </div>
+      )}
     </motion.div>
   )
 }

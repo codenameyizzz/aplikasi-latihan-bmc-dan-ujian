@@ -55,6 +55,36 @@ export interface QuestionEssay {
   }[]
 }
 
+export interface BmcCaseStudy {
+  id: string
+  title: string
+  shortTitle: string
+  scenario: string
+  task: string
+  answerKey: Record<BmcBlockId, string[]>
+  gradingRubric: {
+    point: string
+    description: string
+  }[]
+}
+
+export interface BmcCaseBlockFeedback {
+  blockId: BmcBlockId
+  blockName: string
+  score: number
+  notes: string
+}
+
+export interface BmcCaseEvaluationResult {
+  score: number
+  verdict: string
+  strengths: string[]
+  improvements: string[]
+  feedback: string
+  suggestedRevision: string
+  blockFeedback: BmcCaseBlockFeedback[]
+}
+
 export interface CustomFlashcard {
   id: string
   materialId: string
@@ -66,7 +96,14 @@ export interface CustomFlashcard {
 
 export interface StudyHistoryEntry {
   id: string
-  type: 'flashcard_mastered' | 'flashcard_unmastered' | 'flashcard_created' | 'quiz_completed' | 'essay_completed' | 'stats_reset'
+  type:
+    | 'flashcard_mastered'
+    | 'flashcard_unmastered'
+    | 'flashcard_created'
+    | 'quiz_completed'
+    | 'essay_completed'
+    | 'bmc_case_completed'
+    | 'stats_reset'
   title: string
   detail: string
   createdAt: string
@@ -78,4 +115,5 @@ export interface StudyStats {
   highScoreMC: number // Highest score in Multiple Choice (percentage)
   totalQuizzesTaken: number
   essaysCompletedCount: number
+  bmcCasesCompletedCount: number
 }

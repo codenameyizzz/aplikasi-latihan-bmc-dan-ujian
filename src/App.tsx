@@ -18,7 +18,8 @@ const defaultStats: StudyStats = {
   reviewNeededCards: [],
   highScoreMC: 0,
   totalQuizzesTaken: 0,
-  essaysCompletedCount: 0
+  essaysCompletedCount: 0,
+  bmcCasesCompletedCount: 0
 }
 
 type ActiveTab = 'dashboard' | 'canvas' | 'flashcards' | 'mc' | 'essay'
@@ -222,8 +223,21 @@ export default function App() {
     triggerToast('Jawaban esai berhasil dievaluasi.')
   }
 
+  const handleBmcCaseCompleted = (caseTitle: string, score: number) => {
+    saveStats({
+      ...stats,
+      bmcCasesCompletedCount: stats.bmcCasesCompletedCount + 1
+    })
+    appendHistory({
+      type: 'bmc_case_completed',
+      title: 'Latihan BMC dinilai',
+      detail: `${caseTitle} - skor ${score}`
+    })
+    triggerToast(`Latihan BMC selesai dinilai: ${score}.`)
+  }
+
   const handleResetStats = () => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus seluruh progres flashcard, kuis, evaluasi esai, dan riwayat belajar?')) {
+    if (window.confirm('Apakah Anda yakin ingin menghapus seluruh progres flashcard, kuis, evaluasi esai, latihan BMC, dan riwayat belajar?')) {
       saveStats(defaultStats)
       saveStudyHistory([
         {
@@ -254,7 +268,7 @@ export default function App() {
           />
         )
       case 'canvas':
-        return <BmcCanvas />
+        return <BmcCanvas onBmcCaseCompleted={handleBmcCaseCompleted} />
       case 'flashcards':
         return (
           <Flashcards
