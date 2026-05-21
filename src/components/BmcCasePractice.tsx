@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { bmcElements } from '../data/bmcData'
 import { bmcCaseStudies, orderedBmcBlockIds } from '../data/bmcCaseStudies'
@@ -9,6 +9,8 @@ import { evaluateBmcCaseWithGemini, getGeminiBmcModelName } from '../lib/geminiB
 interface BmcCasePracticeProps {
   onCaseCompleted?: (caseTitle: string, score: number) => void
 }
+
+const LOCAL_STORAGE_BMC_CASE_PRACTICE_KEY = 'bmc_case_practice_progress_v1'
 
 const emptyAnswers = (): Record<BmcBlockId, string> => ({
   KP: '',
@@ -29,6 +31,54 @@ export function BmcCasePractice({ onCaseCompleted }: BmcCasePracticeProps) {
   const [isEvaluating, setIsEvaluating] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submittedCases, setSubmittedCases] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(LOCAL_STORAGE_BMC_CASE_PRACTICE_KEY)
+      if (!stored) return
+
+      const parsed = JSON.parse(stored) as {
+        selectedCaseId?: string
+        answersByCase?: Record<string, Record<BmcBlockId, string>>
+        evaluations?: Record<string, BmcCaseEvaluationResult>
+        submittedCases?: Record<string, boolean>
+      }
+
+      if (parsed.selectedCaseId && bmcCaseStudies.some((item) => item.id === parsed.selectedCaseId)) {
+        setSelectedCaseId(parsed.selectedCaseId)
+      }
+
+      if (parsed.answersByCase) {
+        setAnswersByCase(parsed.answersByCase)
+      }
+
+      if (parsed.evaluations) {
+        setEvaluations(parsed.evaluations)
+      }
+
+      if (parsed.submittedCases) {
+        setSubmittedCases(parsed.submittedCases)
+      }
+    } catch (error) {
+      console.error('Failed loading BMC case practice data:', error)
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        LOCAL_STORAGE_BMC_CASE_PRACTICE_KEY,
+        JSON.stringify({
+          selectedCaseId,
+          answersByCase,
+          evaluations,
+          submittedCases
+        })
+      )
+    } catch (error) {
+      console.error('Failed saving BMC case practice data:', error)
+    }
+  }, [answersByCase, evaluations, selectedCaseId, submittedCases])
 
   const selectedCase = bmcCaseStudies.find((item) => item.id === selectedCaseId) || bmcCaseStudies[0]
   const currentAnswers = answersByCase[selectedCaseId] || emptyAnswers()
@@ -137,6 +187,9 @@ export function BmcCasePractice({ onCaseCompleted }: BmcCasePracticeProps) {
           <div className="text-brand-stone">
             Kasus yang pernah dievaluasi: <strong className="text-brand-olive">{totalCompletedCases}</strong> dari{' '}
             <strong className="text-brand-olive">{bmcCaseStudies.length}</strong>
+          </div>
+          <div className="text-brand-stone">
+            Jawaban dan hasil evaluasi latihan ini tersimpan otomatis di browser.
           </div>
         </div>
       </div>

@@ -13,6 +13,7 @@ import { CustomFlashcard, StudyHistoryEntry, StudyStats } from './types'
 const LOCAL_STORAGE_STATS_KEY = 'bmc_study_stats_progress_v1'
 const LOCAL_STORAGE_HISTORY_KEY = 'bmc_study_history_v1'
 const LOCAL_STORAGE_CUSTOM_FLASHCARDS_KEY = 'bmc_custom_flashcards_v1'
+const LOCAL_STORAGE_BMC_CASE_PRACTICE_KEY = 'bmc_case_practice_progress_v1'
 
 const defaultStats: StudyStats = {
   masteredCards: [],
@@ -266,6 +267,11 @@ export default function App() {
   const handleResetStats = () => {
     if (window.confirm('Apakah Anda yakin ingin menghapus seluruh progres flashcard, kuis, true / false, evaluasi esai, latihan BMC, dan riwayat belajar?')) {
       saveStats(defaultStats)
+      try {
+        localStorage.removeItem(LOCAL_STORAGE_BMC_CASE_PRACTICE_KEY)
+      } catch (error) {
+        console.error('Failed clearing BMC case practice data:', error)
+      }
       saveStudyHistory([
         {
           id: createLocalId('history'),
