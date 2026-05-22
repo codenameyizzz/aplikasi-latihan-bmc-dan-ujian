@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { bmcElements } from '../data/bmcData'
 import { bmcCaseStudies, orderedBmcBlockIds } from '../data/bmcCaseStudies'
 import { BmcBlockId, BmcCaseEvaluationResult } from '../types'
+import { exportBmcCaseReportToPdf } from '../lib/pdfExport'
 import { Icon } from './Icon'
 import { evaluateBmcCaseWithGemini, getGeminiBmcModelName } from '../lib/geminiBmcEvaluator'
 
@@ -305,12 +306,30 @@ export function BmcCasePractice({ onCaseCompleted }: BmcCasePracticeProps) {
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
-        <button
-          onClick={handleResetCase}
-          className="w-full sm:w-auto bg-[#FAF0ED] hover:bg-[#F6E2DD] border border-[#EAD3CE] text-[#9A5B50] px-4 py-2.5 rounded-xl text-xs font-bold transition"
-        >
-          Reset Jawaban Kasus Ini
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <button
+            onClick={handleResetCase}
+            className="w-full sm:w-auto bg-[#FAF0ED] hover:bg-[#F6E2DD] border border-[#EAD3CE] text-[#9A5B50] px-4 py-2.5 rounded-xl text-xs font-bold transition"
+          >
+            Reset Jawaban Kasus Ini
+          </button>
+
+          {currentEvaluation && (
+            <button
+              onClick={() =>
+                exportBmcCaseReportToPdf({
+                  caseStudy: selectedCase,
+                  answers: currentAnswers,
+                  evaluation: currentEvaluation
+                })
+              }
+              className="w-full sm:w-auto bg-[#FAF9F6] hover:bg-brand-sand border border-brand-border text-brand-charcoal px-4 py-2.5 rounded-xl text-xs font-bold transition inline-flex items-center justify-center gap-2"
+            >
+              <Icon name="FileDown" size={14} />
+              <span>Export Hasil BMC PDF</span>
+            </button>
+          )}
+        </div>
 
         <button
           onClick={handleEvaluate}

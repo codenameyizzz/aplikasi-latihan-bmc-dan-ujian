@@ -4,6 +4,7 @@ import { totalBmcCaseStudies } from '../data/bmcCaseStudies'
 import { totalDocxQuestionCount, getMultipleChoiceQuestionsForMaterial } from '../data/docxMultipleChoiceQuestionBank'
 import { studyMaterials, totalMaterialEssayQuestions } from '../data/materialStudyData'
 import { getTrueFalseQuestionsForMaterial, totalTrueFalseQuestionCount } from '../data/trueFalseQuestionBank'
+import { exportStudyReportToPdf } from '../lib/pdfExport'
 import { StudyHistoryEntry, StudyStats } from '../types'
 import { Icon } from './Icon'
 
@@ -67,6 +68,22 @@ export function Dashboard({
             Project ini memadukan canvas BMC, flashcard, kuis, essay, dan file materi asli. Riwayat belajar serta
             flashcard tambahan user juga disimpan langsung di browser.
           </p>
+          <div className="pt-2">
+            <button
+              onClick={() =>
+                exportStudyReportToPdf({
+                  stats,
+                  totalFlashcards,
+                  customFlashcardCount,
+                  studyHistory
+                })
+              }
+              className="inline-flex items-center gap-2 bg-white/12 hover:bg-white/20 border border-white/20 text-[#FAF9F6] px-4 py-2 rounded-xl text-xs font-bold transition"
+            >
+              <Icon name="FileDown" size={14} />
+              <span>Export Laporan Belajar PDF</span>
+            </button>
+          </div>
         </div>
       </div>
 
